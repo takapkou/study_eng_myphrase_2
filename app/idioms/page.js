@@ -100,7 +100,7 @@ export default function IdiomsPage() {
           labelFn={ch => `${ch.code} ${ch.titleJa}`}
           countFn={ch => ch.sections?.reduce((n, s) => n + (s.rows?.length || 0), 0) || 0}
         />
-        <div style={{ flex: 1, padding: '28px 32px', paddingBottom: '100px', minWidth: 0 }}>
+        <div style={{ flex: 1, padding: 'clamp(16px, 4vw, 32px)', paddingBottom: '100px', minWidth: 0 }}>
           {filtered.map((ch, ci) => {
             const anyMatch = ch.sections?.some(sec =>
               (sec.rows || []).some(r => !q || r.chunk.toLowerCase().includes(q) || r.example.toLowerCase().includes(q) || r.meaning.toLowerCase().includes(q))

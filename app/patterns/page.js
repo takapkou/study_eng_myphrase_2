@@ -99,7 +99,7 @@ export default function PatternsPage() {
           labelFn={ch => `${ch.code} ${ch.title}`}
           countFn={ch => ch.sections?.reduce((n, s) => n + (s.phrases?.length || 0), 0) || 0}
         />
-        <div style={{ flex: 1, padding: '28px 32px', paddingBottom: '100px', minWidth: 0 }}>
+        <div style={{ flex: 1, padding: 'clamp(16px, 4vw, 32px)', paddingBottom: '100px', minWidth: 0 }}>
           {filtered.map((ch, ci) => {
             const anyMatch = ch.sections?.some(sec =>
               (sec.phrases || []).some(p => !q || p.toLowerCase().includes(q)) ||
