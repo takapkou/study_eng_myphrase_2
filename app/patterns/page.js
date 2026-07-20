@@ -7,6 +7,7 @@ import ChapterGrid from '@/components/ChapterGrid'
 import { pChapters } from '@/lib/pData'
 import { useAudio } from '@/lib/useAudio'
 import { loadFocus, toggleFocusItem } from '@/lib/focus'
+import { loadLast, loadVisits, recordVisit } from '@/lib/progress'
 
 const ACCENT = '#7C83FF'
 
@@ -65,9 +66,23 @@ export default function PatternsPage() {
   const [activeChapter, setActiveChapter] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [focusMap, setFocusMap] = useState({})
+  const [visits, setVisits] = useState({})
+  const [lastChapterId, setLastChapterId] = useState(null)
   const { playingText, isPlayingAll, isLoop, speed, play, stop, playAll, setIsLoop, setSpeed } = useAudio()
 
-  useEffect(() => { setFocusMap(loadFocus()) }, [])
+  useEffect(() => {
+    setFocusMap(loadFocus())
+    setVisits(loadVisits())
+    setLastChapterId(loadLast().p || null)
+  }, [])
+
+  useEffect(() => {
+    if (activeChapter && activeChapter !== 'all') {
+      recordVisit('p', activeChapter)
+      setVisits(loadVisits())
+      setLastChapterId(activeChapter)
+    }
+  }, [activeChapter])
 
   const q = searchQuery.toLowerCase()
   const showGrid = activeChapter === null && !q
@@ -103,7 +118,8 @@ export default function PatternsPage() {
         />
         <div style={{ flex: 1, padding: showGrid ? 0 : 'clamp(16px, 4vw, 32px)', paddingBottom: showGrid ? 0 : '100px', minWidth: 0 }}>
           {showGrid && (
-            <ChapterGrid chapters={pChapters} type="p" accent={ACCENT} onSelect={setActiveChapter} onShowAll={() => setActiveChapter('all')} />
+            <ChapterGrid chapters={pChapters} type="p" accent={ACCENT} onSelect={setActiveChapter} onShowAll={() => setActiveChapter('all')}
+              focusMap={focusMap} visits={visits} lastChapterId={lastChapterId} />
           )}
           {!showGrid && filtered.map((ch, ci) => {
             const anyMatch = ch.sections?.some(sec =>
