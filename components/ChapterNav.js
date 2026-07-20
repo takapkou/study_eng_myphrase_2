@@ -18,6 +18,7 @@ export function ChapterNav({ chapters, activeChapter, onSelect, accent = '#7C83F
 
   return (
     <div style={{ background: '#161820', borderBottom: '1px solid #2A2D3E', padding: '8px 12px', display: 'flex', gap: '6px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <NavBtn label={isMobile ? '🏠' : 'ホーム'} active={activeChapter === null} onClick={() => onSelect(null)} accent={accent} />
       <NavBtn label="ALL" active={activeChapter === 'all'} onClick={() => onSelect('all')} accent={accent} />
       {chapters.map(ch => (
         <NavBtn key={ch.id} label={isMobile ? ch.code : labelFn(ch)} active={activeChapter === ch.id} onClick={() => onSelect(ch.id)} accent={accent} />
@@ -47,6 +48,7 @@ export function Sidebar({ chapters, activeChapter, onSelect, accent = '#7C83FF',
   const total = chapters.reduce((n, ch) => n + countFn(ch), 0)
 
   const items = [
+    { id: null, label: 'ホーム', count: null },
     { id: 'all', label: 'ALL', count: total },
     ...chapters.map(ch => ({ id: ch.id, label: labelFn(ch), count: countFn(ch) }))
   ]
@@ -60,7 +62,7 @@ export function Sidebar({ chapters, activeChapter, onSelect, accent = '#7C83FF',
     <>
       <div style={{ fontSize: '10px', color: '#565B78', fontWeight: 600, letterSpacing: '.09em', textTransform: 'uppercase', marginBottom: '8px', padding: '0 6px' }}>Chapters</div>
       {items.map(item => (
-        <div key={item.id} onClick={() => handleSelect(item.id)} style={{
+        <div key={item.id ?? 'home'} onClick={() => handleSelect(item.id)} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '8px 10px', borderRadius: '7px', cursor: 'pointer', marginBottom: '2px',
           background: activeChapter === item.id
@@ -74,7 +76,9 @@ export function Sidebar({ chapters, activeChapter, onSelect, accent = '#7C83FF',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             fontWeight: activeChapter === item.id ? 600 : 400,
           }}>{item.label}</span>
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: '#565B78', background: '#1E2030', borderRadius: '4px', padding: '1px 5px', flexShrink: 0, marginLeft: '6px' }}>{item.count}</span>
+          {item.count !== null && (
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: '#565B78', background: '#1E2030', borderRadius: '4px', padding: '1px 5px', flexShrink: 0, marginLeft: '6px' }}>{item.count}</span>
+          )}
         </div>
       ))}
     </>

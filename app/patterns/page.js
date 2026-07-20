@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import NavBar from '@/components/NavBar'
 import AudioBar from '@/components/AudioBar'
 import { ChapterNav, Sidebar } from '@/components/ChapterNav'
+import ChapterGrid from '@/components/ChapterGrid'
 import { pChapters } from '@/lib/pData'
 import { useAudio } from '@/lib/useAudio'
 import { loadFocus, toggleFocusItem } from '@/lib/focus'
@@ -61,7 +62,7 @@ function tipHtml(tip) {
 }
 
 export default function PatternsPage() {
-  const [activeChapter, setActiveChapter] = useState('all')
+  const [activeChapter, setActiveChapter] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [focusMap, setFocusMap] = useState({})
   const { playingText, isPlayingAll, isLoop, speed, play, stop, playAll, setIsLoop, setSpeed } = useAudio()
@@ -69,7 +70,8 @@ export default function PatternsPage() {
   useEffect(() => { setFocusMap(loadFocus()) }, [])
 
   const q = searchQuery.toLowerCase()
-  const filtered = activeChapter === 'all' ? pChapters : pChapters.filter(ch => ch.id === activeChapter)
+  const showGrid = activeChapter === null && !q
+  const filtered = (activeChapter === 'all' || activeChapter === null) ? pChapters : pChapters.filter(ch => ch.id === activeChapter)
 
   function handleToggleFocus(text) {
     setFocusMap(prev => toggleFocusItem(prev, text))
@@ -99,8 +101,11 @@ export default function PatternsPage() {
           labelFn={ch => `${ch.code} ${ch.title}`}
           countFn={ch => ch.sections?.reduce((n, s) => n + (s.phrases?.length || 0), 0) || 0}
         />
-        <div style={{ flex: 1, padding: 'clamp(16px, 4vw, 32px)', paddingBottom: '100px', minWidth: 0 }}>
-          {filtered.map((ch, ci) => {
+        <div style={{ flex: 1, padding: showGrid ? 0 : 'clamp(16px, 4vw, 32px)', paddingBottom: showGrid ? 0 : '100px', minWidth: 0 }}>
+          {showGrid && (
+            <ChapterGrid chapters={pChapters} type="p" accent={ACCENT} onSelect={setActiveChapter} onShowAll={() => setActiveChapter('all')} />
+          )}
+          {!showGrid && filtered.map((ch, ci) => {
             const anyMatch = ch.sections?.some(sec =>
               (sec.phrases || []).some(p => !q || p.toLowerCase().includes(q)) ||
               (sec.compare || []).some(c => !q || c.phrase.toLowerCase().includes(q))

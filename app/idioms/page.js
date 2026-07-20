@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import NavBar from '@/components/NavBar'
 import AudioBar from '@/components/AudioBar'
 import { ChapterNav, Sidebar } from '@/components/ChapterNav'
+import ChapterGrid from '@/components/ChapterGrid'
 import { iChapters } from '@/lib/iData'
 import { useAudio } from '@/lib/useAudio'
 import { loadFocus, toggleFocusItem } from '@/lib/focus'
@@ -63,7 +64,7 @@ function ChunkCard({ row, playing, onPlay, focused, onToggle, q }) {
 }
 
 export default function IdiomsPage() {
-  const [activeChapter, setActiveChapter] = useState('all')
+  const [activeChapter, setActiveChapter] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [focusMap, setFocusMap] = useState({})
   const { playingText, isPlayingAll, isLoop, speed, play, stop, playAll, setIsLoop, setSpeed } = useAudio()
@@ -71,7 +72,8 @@ export default function IdiomsPage() {
   useEffect(() => { setFocusMap(loadFocus()) }, [])
 
   const q = searchQuery.toLowerCase()
-  const filtered = activeChapter === 'all' ? iChapters : iChapters.filter(ch => ch.id === activeChapter)
+  const showGrid = activeChapter === null && !q
+  const filtered = (activeChapter === 'all' || activeChapter === null) ? iChapters : iChapters.filter(ch => ch.id === activeChapter)
 
   function handleToggleFocus(text) {
     setFocusMap(prev => toggleFocusItem(prev, text))
@@ -100,8 +102,11 @@ export default function IdiomsPage() {
           labelFn={ch => `${ch.code} ${ch.titleJa}`}
           countFn={ch => ch.sections?.reduce((n, s) => n + (s.rows?.length || 0), 0) || 0}
         />
-        <div style={{ flex: 1, padding: 'clamp(16px, 4vw, 32px)', paddingBottom: '100px', minWidth: 0 }}>
-          {filtered.map((ch, ci) => {
+        <div style={{ flex: 1, padding: showGrid ? 0 : 'clamp(16px, 4vw, 32px)', paddingBottom: showGrid ? 0 : '100px', minWidth: 0 }}>
+          {showGrid && (
+            <ChapterGrid chapters={iChapters} type="i" accent={ACCENT} onSelect={setActiveChapter} onShowAll={() => setActiveChapter('all')} />
+          )}
+          {!showGrid && filtered.map((ch, ci) => {
             const anyMatch = ch.sections?.some(sec =>
               (sec.rows || []).some(r => !q || r.chunk.toLowerCase().includes(q) || r.example.toLowerCase().includes(q) || r.meaning.toLowerCase().includes(q))
             )
